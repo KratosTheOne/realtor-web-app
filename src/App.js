@@ -6,12 +6,14 @@ import Offers from './pages/Offers';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import ForgotPassword from './pages/ForgotPassword';
+import Header from './components/Header';
 
 
 function App() {
   return (
     <div className="App">
       <BrowserRouter>
+        <Header />
         <Routes>
           <Route 
             path="/"
