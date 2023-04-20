@@ -58,7 +58,7 @@ const SignUp = () => {
 
   return (
     <section>
-      <h1 className="text-3xl text-center font-se,ibold mt-6">Sign Up</h1>
+      <h1 className="text-3xl text-center font-semibold mt-6">Sign Up</h1>
       <div className="flex justify-center flex-wrap items-center px-6 py-12 max-w-6xl mx-auto">
         <div className="md:w-[67%] lg:w-[50%] mb-12 md:mb-6">
           <img 
