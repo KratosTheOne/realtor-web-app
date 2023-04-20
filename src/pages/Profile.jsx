@@ -1,12 +1,17 @@
-import { getAuth } from 'firebase/auth';
+import { getAuth, updateProfile } from 'firebase/auth';
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router';
+import { toast } from 'react-toastify';
+import { doc, updateDoc } from "firebase/firestore"
+import { db } from '../firebase.config';
 
 const Profile = () => {
 
   const navigate = useNavigate();
 
   const auth = getAuth();
+
+  const [changeDetail, setChangeDetail] = useState(false);
 
   const [formData, setFormData] = useState({
     name: auth.currentUser.displayName,
@@ -18,6 +23,34 @@ const Profile = () => {
   const onLogOut = () => {
     auth.signOut();
     navigate("/")
+  }
+
+  const onChange = (e) => {
+    e.preventDefault();
+    setFormData((prevState) => ({
+      ...prevState,
+      [e.target.id]: e.target.value,
+    }))
+  }
+
+  const onSubmit = async() => {
+    try {
+      if(auth.currentUser.displayName !== name) {
+        //update display name firebase auth
+        await updateProfile(auth.currentUser, {
+          displayName: name,
+        });
+
+        //update the name in firestore
+        const docRef = doc(db, "users", auth.currentUser.uid);
+        await updateDoc(docRef, {
+          name: name,
+        })
+      }
+      toast.success("Profile details updated")
+    } catch (error) {
+      toast.error("Could not apply the changes");
+    }
   }
 
   return (
@@ -33,8 +66,9 @@ const Profile = () => {
               id="name" 
               placeholder="Name" 
               value={name} 
-              disabled
-              className="w-full px-4 py-2 text-xl text-gray-700 bg-white border border-gray-300 rounded transition ease-in-out mb-6" 
+              disabled={!changeDetail}
+              onChange={onChange}
+              className={`w-full px-4 py-2 text-xl text-gray-700 bg-white border border-gray-300 rounded transition ease-in-out mb-6 ${changeDetail && "bg-red-200 focus:bg-red-200"}`} 
             />
 
             {/*Email input*/}
@@ -49,7 +83,10 @@ const Profile = () => {
             />
 
             <div className="flex justify-between whitespace-nowrap text-sm sm:text-lg mb-6">
-              <p className="flex items-center">Do you want to change your name? <span className="text-red-600 hover:text-red-800 transition duration-200 ease-in-out ml-1 cursor-pointer">Edit</span></p>
+              <p className="flex items-center">Do you want to change your name? <span onClick={() => {
+                changeDetail && onSubmit();
+                setChangeDetail((prevState) => !prevState);
+              }} className="text-red-600 hover:text-red-800 transition duration-200 ease-in-out ml-1 cursor-pointer">{changeDetail ? "Apply Changes" : "Edit"}</span></p>
               <p onClick={onLogOut} className="text-blue-600 hover:text-blue-800 transition duration-200 ease-in-out cursor-pointer">Sign Out</p>
             </div>
           </form>
